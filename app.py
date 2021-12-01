@@ -126,6 +126,28 @@ def load_inventory():
     finally:
        con.close()
 
+
+@app.route("/addtoCart", methods=["POST", "GET"])
+def addtoCart():
+    sender = request.host
+    print(sender)
+    if request.method == "POST":
+        try:
+            amount = request.form["addCart"]
+            name = request.origin
+            print(amount)
+            with sql.connect("groceryData.db") as con:
+                cur = con.cursor()
+                #cur.execute(
+                 #   "INSERT INTO ShoppingCart (Kind,Cost,Amount,Name,Tax) VALUES (?,?,?,?,?,?)",
+                 #   (name, )
+
+                #)
+        except:
+            con.rollback()
+        finally:
+            return render_template("")
+
 if __name__ == "__main__":
     load_inventory()
     app.run(host="0.0.0.0")

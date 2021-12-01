@@ -8,6 +8,7 @@
     <td>Cost</td>
     <td>Amount in Stock</td>
     <td>Name</td>
+    <td>Add To Cart</td>
   </thead>
 
   {% for row in rows %}
@@ -16,8 +17,12 @@
        <td>{{row["Cost"]}}</td>
        <td>{{row["Amount"]}}</td>
        <td>{{row["Name"]}}</td>
+        <td><input type="number" name="Add"></td>
+        <td><input type="submit" title ="Add to cart"></td>
     </tr>
+
   {% endfor %}
+    <td><input type ="button" name ="Submit"></td>
 </table>
 <a href="/">back to home</a>
 <br>
