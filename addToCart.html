@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+<center>
+<form action="{{url_for('addToCart')}}" method="POST">
+  <label for="Example">Choose your item in {{ dept }}</label>
+  <br>
+  <select name = "items"
+          {% for row in rows %}
+          <option value = "{{ row }}" SELECTED>{{ row["Name"] }}</option>
+          {% endfor %}
+  </select>
+  <br>
+  <label for="amount">Number of the product (1-10):</label>
+  <br>
+  <input type="number" id="amount" name="amount" min="1" max="10">
+<br>
+<td><input type="submit" title ="submit"></td>
+</form>
+</center>
+<center>
+<br>
+<a href="/">back to home</a>
+<br>
+<a href="Checkout.html">Click here to buy everything in your cart</a>
+<br>
+<a href="Inventory.html">Click here to look at something else in our inventory</a>
+</center>
+</body>
+<html>

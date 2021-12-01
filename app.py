@@ -4,21 +4,31 @@ import datetime
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
 
 @app.route("/ShoppingCart.html")
 def get_shopping_cart():
     return render_template("ShoppingCart.html")
 
+
 @app.route("/Receipt.html")
 def get_receipt():
     return render_template("Receipt.html")
 
+
 @app.route("/Inventory.html")
 def get_inventory():
     return render_template("Inventory.html")
+
+
+@app.route("/changeDept.html")
+def get_changeDept():
+    return render_template("changeDept.html")
+
 
 @app.route("/TotalInventory.html")
 def get_total_inventory():
@@ -74,6 +84,24 @@ def get_household_inventory():
 def checkout():
     return render_template("Checkout.html")
 
+def load_items(dept):
+    con = sql.connect("groceryData.db")
+    con.row_factory = sql.Row
+    cur = con.cursor()
+    if(dept == "Produce"):
+        query = "SELECT Name FROM Inventory WHERE Inventory.Kind ='Produce'"
+    elif dept == "Seafood":
+        query = "SELECT Name FROM Inventory WHERE Inventory.Kind ='Seafood'"
+    elif dept == "Household":
+        query = "SELECT Name FROM Inventory WHERE Inventory.Kind ='Household'"
+    elif dept == "Electronics":
+        query = "SELECT Name FROM Inventory WHERE Inventory.Kind ='Electronics'"
+
+    cur.execute(query)
+    rows = cur.fetchall()
+
+    return render_template("addToCart.html", rows=rows, dept=dept)
+
 def load_inventory():
     try:
        with sql.connect("groceryData.db") as con:
@@ -126,27 +154,42 @@ def load_inventory():
     finally:
        con.close()
 
-
-@app.route("/addtoCart", methods=["POST", "GET"])
-def addtoCart():
-    sender = request.host
-    print(sender)
+@app.route("/changeDept", methods=["POST", "GET"])
+def changeDept():
     if request.method == "POST":
         try:
-            amount = request.form["addCart"]
-            name = request.origin
+            depart = request.form["departments"]
+        except:
+            print("idk how u got here")
+            pass
+
+        finally:
+            return load_items(depart)
+
+
+@app.route("/addToCart", methods=["POST", "GET"])
+def addToCart():
+    if request.method == "POST":
+        try:
+            name = request.form["items"]
+            print(name)
+            amount = request.form["amount"]
             print(amount)
+            query = "SELECT Cost,Kind FROM Inventory WHERE Inventory.Name =@name"
             with sql.connect("groceryData.db") as con:
                 cur = con.cursor()
-                #cur.execute(
-                 #   "INSERT INTO ShoppingCart (Kind,Cost,Amount,Name,Tax) VALUES (?,?,?,?,?,?)",
-                 #   (name, )
-
-                #)
+                cur.execute(query)
+                hold = cur.fetchall()
+                cost=hold[0]
+                kind = hold[1]
+                cur.execute(
+                    "INSERT INTO ShoppingCart (Kind,Cost,Amount,Name,Tax) VALUES (?,?,?,?,?,?)",(kind,cost,amount,name,0.07),
+                )
         except:
+            print("IN EXCEPT")
             con.rollback()
         finally:
-            return render_template("")
+            return render_template("changeDept.html")
 
 if __name__ == "__main__":
     load_inventory()
