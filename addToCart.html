@@ -7,7 +7,7 @@
   <br>
   <select name = "items",
           {% for row in rows %}
-          <option value = {{ row["Name"] }} SELECTED>{{ row["Name"] }}</option>
+          <option value = '{{ row["Name"] }}' SELECTED>{{ row["Name"] }}</option>
           {% endfor %}
   </select>
   <br>
