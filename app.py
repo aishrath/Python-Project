@@ -12,7 +12,13 @@ def home():
 
 @app.route("/ShoppingCart.html")
 def get_shopping_cart():
-    return render_template("ShoppingCart.html")
+    con = sql.connect("groceryData.db")
+    con.row_factory = sql.Row
+    cur = con.cursor()
+    query = "SELECT Kind,Cost,Amount,Name FROM ShoppingCart"
+    cur.execute(query)
+    rows = cur.fetchall()
+    return render_template("ShoppingCart.html", rows=rows)
 
 
 @app.route("/Receipt.html")
@@ -172,21 +178,22 @@ def addToCart():
     if request.method == "POST":
         try:
             name = request.form["items"]
-            print(name)
             amount = request.form["amount"]
-            print(amount)
-            query = "SELECT Cost,Kind FROM Inventory WHERE Inventory.Name =@name"
             with sql.connect("groceryData.db") as con:
                 cur = con.cursor()
-                cur.execute(query)
+                cur.execute("SELECT Cost,Kind FROM Inventory WHERE Inventory.Name= ?", (name,))
                 hold = cur.fetchall()
-                cost=hold[0]
-                kind = hold[1]
-                cur.execute(
-                    "INSERT INTO ShoppingCart (Kind,Cost,Amount,Name,Tax) VALUES (?,?,?,?,?,?)",(kind,cost,amount,name,0.07),
-                )
+                cost=hold[0][0]
+                kind = hold[0][1]
+                cur.execute("INSERT INTO ShoppingCart (Kind,Cost,Amount,Name,Tax) VALUES (?,?,?,?,?)",(kind,cost,int(amount),name,0.07))
+                con.commit()
+                #cur.execute("UPDATE Inventory"
+                #            " SET Inventory.Amount = Inventory.Amount - ?", (amount),
+                 #           "WHERE Inventory.Name =?",(name,))
+                #con.commit()
+                print("committed")
         except:
-            print("IN EXCEPT")
+            print("something went wrong")
             con.rollback()
         finally:
             return render_template("changeDept.html")
