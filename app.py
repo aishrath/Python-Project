@@ -187,10 +187,10 @@ def addToCart():
                 kind = hold[0][1]
                 cur.execute("INSERT INTO ShoppingCart (Kind,Cost,Amount,Name,Tax) VALUES (?,?,?,?,?)",(kind,cost,int(amount),name,0.07))
                 con.commit()
-                #cur.execute("UPDATE Inventory"
-                #            " SET Inventory.Amount = Inventory.Amount - ?", (amount),
-                 #           "WHERE Inventory.Name =?",(name,))
-                #con.commit()
+                query = f"UPDATE Inventory SET Amount = Amount - {int(amount)} where Name = '{name}'"
+
+                cur.execute(query)
+                con.commit()
                 print("committed")
         except:
             print("something went wrong")
