@@ -64,22 +64,16 @@ def get_total_inventory():
     return render_template("TotalInventory.html", rows=get_X_inventory("TotalInventory"))
 
 
-@app.route("/changeDept.html")
-def get_changeDept():
-    return render_template("changeDept.html")
-
-@app.route("/RequestProduct.html")
-def request_prods():
-    return render_template("RequestProduct.html")
-
 @app.route("/ShoppingCart.html")
 def get_shopping_cart():
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
     cur = con.cursor()
     cur.execute("SELECT Kind,Cost,Amount,Name FROM ShoppingCart")
-    return render_template("ShoppingCart.html", rows=cur.fetchall())
+    rows = cur.fetchall()
     con.close()
+    return render_template("ShoppingCart.html", rows=rows)
+
 
 @app.route("/Checkout.html")
 def get_checkout():
@@ -94,42 +88,43 @@ def get_checkout():
         tax += row["Cost"] * row["Amount"] * row["Tax"]
     total += sub + tax
     totals = (sub, tax, total)
-    return render_template("Checkout.html", rows=rows, totals=totals)
     con.close()
+    return render_template("Checkout.html", rows=rows, totals=totals)
 
-@app.route("/requests.html")
-def requests():
+
+@app.route("/RequestProduct.html")
+def add_request():
+    return render_template("RequestProduct.html")
+
+
+@app.route("/ShowRequests.html")
+def show_requests():
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
-
     cur = con.cursor()
-    print("established cursor")
     cur.execute("SELECT * FROM Requests")
-    print("executed")
     rows = cur.fetchall()
-    print(len(rows))
-    return render_template("requests.html",rows=rows)
     con.close()
+    return render_template("ShowRequests.html", rows=rows)
 
-@app.route("/addReview.html")
+
+@app.route("/AddReview.html")
 def add_review():
-    return render_template("addReview.html")
+    return render_template("AddReview.html")
+
 
 @app.route("/ShowReviews.html")
-def get_reviews():
+def show_reviews():
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
-
     cur = con.cursor()
-    print("established cursor")
-    cur.execute("SELECT * FROM Review")
-    print("executed")
+    cur.execute("SELECT * FROM Reviews")
     rows = cur.fetchall()
-    print(len(rows))
-    return render_template("ShowReviews.html",rows=rows)
     con.close()
+    return render_template("ShowReviews.html", rows=rows)
 
-app.route("/Receipt.html")
+
+@app.route("/Receipt.html")
 def get_receipt():
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
@@ -142,97 +137,66 @@ def get_receipt():
         tax += row["Cost"] * row["Amount"] * row["Tax"]
     total += sub + tax
     totals = (sub, tax, total)
-    return render_template("Receipt.html", rows=cur.fetchall(), totals=totals)
     con.close()
+    return render_template("Receipt.html", rows=rows, totals=totals)
 
-@app.route("/addrec", methods=["POST", "GET"])
-def addrec():
+
+@app.route("/addReview", methods=["POST", "GET"])
+def addReview():
     if request.method == "POST":
-       try:
-          print("inside try")
-          name = request.form["Name"]
-          print("name is ", name)
-          rating = request.form["Rating"]
-          print("rating is ", rating)
-          review = request.form["Review"]
-          print("review is ", review)
-          with sql.connect("groceryData.db") as con:
-             cur = con.cursor()
-             print("after cursor set")
-             cur.execute("INSERT INTO Review (Name,Rating,Review) VALUES (?,?,?)",(name, rating, review))
-             print("after execute")
-             con.commit()
-             print("after commit")
-       except:
-          print("inside except")
-          con.rollback()
-       finally:
-          return render_template("index.html")
-          con.close()
+        try:
+            name = request.form["Name"]
+            rating = request.form["Rating"]
+            review = request.form["Review"]
+            with sql.connect("groceryData.db") as con:
+                cur = con.cursor()
+                cur.execute("INSERT INTO Reviews (Name,Rating,Review) VALUES (?,?,?)", (name, rating, review))
+                con.commit()
+        except:
+            con.rollback()
+            con.close()
+            return render_template("index.html")
+        finally:
+            con.close()
+            return show_reviews()
 
-@app.route("/getrec")
-def getrec():
-    con = sql.connect("groceryData.db")
-    con.row_factory = sql.Row
 
-    cur = con.cursor()
-    print("established cursor")
-    cur.execute("SELECT * FROM Review")
-    print("executed")
-    rows = cur.fetchall()
-    print(len(rows))
-    return render_template("ShowReviews.html", rows=rows)
-    con.close()
-
-@app.route("/requestproduct", methods=["POST", "GET"])
-def requestproduct():
-   if request.method == "POST":
-       try:
-          print("inside try")
-          name = request.form["Name"]
-          print("name is ", name)
-          kind = request.form["Kind"]
-          print("kind is ", kind)
-          with sql.connect("groceryData.db") as con:
-             cur = con.cursor()
-             print("after cursor set")
-             cur.execute("INSERT INTO Requests (Name,Kind) VALUES (?,?)",(name, kind))
-             print("after execute")
-             con.commit()
-             print("after commit")
-       except:
-          print("inside except")
-          con.rollback()
-       finally:
-          cur.execute("SELECT * FROM Requests")
-          print("executed")
-          rows = cur.fetchall()
-          print(len(rows))
-          return render_template("requests.html",rows=rows)
-          con.close() 
-    
-@app.route("/filecomplaint", methods=["POST", "GET"])
-def filecomplaint():
+@app.route("/requestProduct", methods=["POST", "GET"])
+def requestProduct():
     if request.method == "POST":
-       try:
-          print("inside try")
-          complaint = request.form["Complaint"]
-          print("name is ", name)
-          time = request.form["Time"]
-          with sql.connect("groceryData.db") as con:
-             cur = con.cursor()
-             print("after cursor set")
-             cur.execute("INSERT INTO Complaints (Complaint,Time) VALUES (?,?)",(complaint, time))
-             print("after execute")
-             con.commit()
-             print("after commit")
-       except:
-          print("inside except")
-          con.rollback()
-       finally:
-          return render_template("requests.html")
-          con.close()
-         
+        try:
+            name = request.form["Name"]
+            kind = request.form["Kind"]
+            with sql.connect("groceryData.db") as con:
+                cur = con.cursor()
+                cur.execute("INSERT INTO Requests (Name,Kind) VALUES (?,?)", (name, kind))
+                con.commit()
+        except:
+            con.rollback()
+            con.close()
+            return render_template("index.html")
+        finally:
+            con.close()
+            return show_requests()
+
+
+@app.route("/fileComplaint", methods=["POST", "GET"])
+def file_complaint():
+    if request.method == "POST":
+        try:
+            complaint = request.form["Complaint"]
+            time = request.form["Time"]
+            with sql.connect("groceryData.db") as con:
+                cur = con.cursor()
+                cur.execute("INSERT INTO Complaints (Complaint,Time) VALUES (?,?)", (complaint, time))
+                con.commit()
+        except:
+            con.rollback()
+        finally:
+            con.close()
+            return render_template("ShowRequests.html")
+
+
 def load_inventory():
     dbInsert("Inventory", "Produce", "Avocados", 1000, 1.00)
     dbInsert("Inventory", "Produce", "Bananas", 1000, 0.10)
@@ -277,35 +241,6 @@ def load_inventory():
     print("load_inventory committed")
 
 
-@app.route("/changeDept", methods=["POST", "GET"])
-def changeDept():
-    depart = None;
-    if request.method == "POST":
-        try:
-            depart = request.form["departments"]
-        except:
-            print("Could not request.form[departments]")
-            pass
-        finally:
-            if(depart is not None):
-                return load_items(depart)
-            else:
-                print("Could not change department")
-
-
-def load_items(dept):
-    con = sql.connect("groceryData.db")
-    con.row_factory = sql.Row
-    cur = con.cursor()
-    query = "SELECT Name FROM Inventory WHERE Kind = '%s'" % dept if (dept != "") else ""
-    if(query != ""):
-        cur.execute(query)
-        return render_template("addToCart.html", rows=cur.fetchall(), dept=dept)
-    else:
-        print("Could not load_items")
-        return None;
-    con.close()
-
 @app.route("/addToCart", methods=["POST", "GET"])
 def addToCart():
     if request.method == "POST":
@@ -323,8 +258,9 @@ def addToCart():
             print("Could not addToCart")
             con.rollback()
         finally:
-            return get_shopping_cart()
             con.close()
+            return get_shopping_cart()
+
 
 @app.route("/Checkout.html", methods=["POST", "GET"])
 def checkout():
@@ -341,20 +277,19 @@ def checkout():
         except:
             print("Could not checkout")
             con.rollback()
-        finally:
-            if(cur is not None):
-                cur.execute("SELECT Kind,Name,Amount,Cost,Tax FROM Receipt")
-                rows = cur.fetchall()
-                sub = tax = total = 0
-                for row in rows:
-                    sub += row["Cost"] * row["Amount"]
-                    tax += row["Cost"] * row["Amount"] * row["Tax"]
-                total += sub + tax
-                totals = (sub, tax, total)
-                return render_template("Receipt.html", rows=rows, totals=totals)
-            print("Could not checkout")
-            return render_template("Checkout.html")
             con.close()
+            return render_template("index.html")
+        finally:
+            cur.execute("SELECT Kind,Name,Amount,Cost,Tax FROM Receipt")
+            rows = cur.fetchall()
+            sub = tax = total = 0
+            for row in rows:
+                sub += row["Cost"] * row["Amount"]
+                tax += row["Cost"] * row["Amount"] * row["Tax"]
+            total += sub + tax
+            totals = (sub, tax, total)
+            return render_template("Receipt.html", rows=rows, totals=totals)
+
 
 if __name__ == "__main__":
     # If db empty, load_inventory()

@@ -1,18 +1,23 @@
 <html>
-<body>
-<center><h1>Thanks for leaving a Review!</h1></center>
-<form action="{{ url_for('addrec') }}" method="POST">
-   Name<br>
-   <input type="text" name="Name"><br>
+   <body>
+      <h1 style="text-align:center">Thanks for leaving a Review!</h1>
+      <form action="{{ url_for('addReview') }}" method="POST">
+         <label>Name</label>
+         <br>
+         <input type="text" name="Name"><br>
 
-   Rating<br>
-   <input type="number" id="name" name="Rating" min="1" max="10"><br>
+         <label>Rating</label>
+         <br>
+         <input type="number" id="name" name="Rating" min="1" max="10"><br>
 
-   Review<br>
-   <textarea name="Review"></textarea><br>
+         <label>Review</label>
+         <br>
+         <textarea name="Review"></textarea>
 
-   <input type="submit" value="submit"><br>
-</form>
-<a href="/">back to home</a>
-</body>
+         <input type="submit" value="submit"><br>
+      </form>
+      <br>
+
+      <a href="/">back to home</a>
+   </body>
 </html>

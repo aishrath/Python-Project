@@ -1,19 +1,17 @@
 <html>
     <body>
-        <h1 style="text-align:center">Thanks for the reviews!</h1>
+        <h1 style="text-align:center">Here are things we hope to add soon!</h1>
 
         <table border = 1>
             <tr>
-                <th>User</th>
-                <th>Review</th>
-                <th>Rating</th>
+                <th>Name</th>
+                <th>Kind</th>
             </tr>
 
             {% for row in rows %}
             <tr>
                 <td>{{row["Name"]}}</td>
-                <td>{{row["Rating"]}}</td>
-                <td>{{row["Review"]}}</td>
+                <td>{{row["Kind"]}}</td>
             </tr>
             {% endfor %}
         </table>
