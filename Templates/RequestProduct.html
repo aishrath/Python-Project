@@ -1,0 +1,15 @@
+<html>
+<body>
+<center><h1>Thanks for leaving your requests! We add new products every day!</h1></center>
+<form action="{{ url_for('requestproduct') }}" method="POST">
+   Product Name<br>
+   <input type="text" name="Name"><br>
+
+   Product Kind<br>
+   <input type="text" name="Kind"><br>
+
+   <input type="submit" value="submit"><br>
+</form>
+<a href="/">back to home</a>
+</body>
+</html>
