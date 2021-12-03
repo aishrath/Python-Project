@@ -100,7 +100,14 @@ def get_receipt():
     con.row_factory = sql.Row
     cur = con.cursor()
     cur.execute("SELECT Kind,Name,Amount,Cost,Tax FROM Receipt")
-    return render_template("Receipt.html", rows=cur.fetchall())
+    rows = cur.fetchall()
+    sub = tax = total = 0
+    for row in rows:
+        sub += row["Cost"] * row["Amount"]
+        tax += row["Cost"] * row["Amount"] * row["Tax"]
+    total += sub + tax
+    totals = (sub, tax, total)
+    return render_template("Receipt.html", rows=cur.fetchall(), totals=totals)
 
 
 def load_inventory():
