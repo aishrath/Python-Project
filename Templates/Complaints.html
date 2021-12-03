@@ -1,0 +1,23 @@
+<html>
+   <body>
+      <h1 style="text-align:center">We're sorry we failed to meet your expectations, please tell us what went wrong so we can improve!</h1>
+      <form action="{{ url_for('file_complaint') }}" method="POST">
+
+         <label>What is you complaint?</label>
+         <br>
+         <textarea name="Complaint"></textarea>
+         <br><br>
+         <label>Is your issue with the Department or a product?</label>
+         <br>
+         <select name="Issue" id="Issue">
+             <option value="Product">Product</option>
+             <option value="Department">Department</option>
+         </select>
+         <br><br>
+         <input type="submit" value="submit"><br>
+      </form>
+      <br>
+
+      <a href="/">back to home</a>
+   </body>
+</html>
