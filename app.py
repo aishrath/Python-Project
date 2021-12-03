@@ -108,6 +108,8 @@ def get_checkout():
     else:
         day = "A Normal Day"
         sale = 1
+    discount = 1 - sale
+    discount = round(discount, 2)
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
     cur = con.cursor()
@@ -120,7 +122,7 @@ def get_checkout():
     total += sub + tax
     totals = (sub, tax, total)
     con.close()
-    return render_template("Checkout.html", day=day, sale=sale*100,rows=rows, totals=totals)
+    return render_template("Checkout.html", day=day, sale=discount*100,rows=rows, totals=totals)
 
 
 @app.route("/RequestProduct.html")
@@ -229,22 +231,34 @@ def requestProduct():
             con.close()
             return show_requests()
 
+@app.route("/Complaints.html")
+def get_complaint_form():
+    con = sql.connect("groceryData.db")
+    cur = con.cursor()
+    cur.execute("SELECT Kind FROM Inventory")
+    rows = cur.fetchall()
+    return render_template("Complaints.html",rows=rows)
 
-@app.route("/fileComplaint", methods=["POST", "GET"])
+
+@app.route("/file_complaint", methods=["POST", "GET"])
 def file_complaint():
     if request.method == "POST":
         try:
+            print("entering try")
             complaint = request.form["Complaint"]
-            time = request.form["Time"]
+            print("complaint is ", complaint)
+            issue = request.form["Issue"]
+            print("time is ", issue)
             with sql.connect("groceryData.db") as con:
+                print("entering connect")
                 cur = con.cursor()
-                cur.execute("INSERT INTO Complaints (Complaint,Time) VALUES (?,?)", (complaint, time))
+                cur.execute("INSERT INTO Complaints (Complaint,Issue) VALUES (?,?)", (complaint, issue))
                 con.commit()
         except:
+            print("except")
             con.rollback()
         finally:
-            con.close()
-            return render_template("ShowRequests.html")
+            return render_template("index.html")
 
 
 def load_inventory():
@@ -368,5 +382,6 @@ if __name__ == "__main__":
     if not sql.connect("groceryData.db").cursor().execute("SELECT * FROM Inventory").fetchone():
         load_inventory()
     randnum = randint(1, 7)
+    print(randnum)
     app.run(host="0.0.0.0")
 
