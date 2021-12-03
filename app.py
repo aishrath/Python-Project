@@ -151,6 +151,30 @@ def show_reviews():
 
 @app.route("/Receipt.html")
 def get_receipt():
+    global randnum
+    print(randnum)
+    print("just got randnum")
+    if randnum == 1:
+       day = "Sunday"
+       num = 0.95
+    if randnum == 2:
+       day = "Monday"
+       num = 0.85
+    if randnum == 3:
+       day = "Tuesday"
+       num = 0.90
+    if randnum == 4:
+       day = "Wednesday"
+       num = 0.75
+    if randnum == 5:
+       day = "Thursday"
+       num = 0.80
+    if randnum == 6:
+       day = "Friday"
+       num = 0.90
+    if randnum == 7:
+       day = "Saturday"
+       num = 0.95
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
     cur = con.cursor()
@@ -158,7 +182,7 @@ def get_receipt():
     rows = cur.fetchall()
     sub = tax = total = 0
     for row in rows:
-        sub += row["Cost"] * row["Amount"]
+        sub += row["Cost"] * row["Amount"] * num
         tax += row["Cost"] * row["Amount"] * row["Tax"]
     total += sub + tax
     totals = (sub, tax, total)
