@@ -76,7 +76,7 @@ def get_shopping_cart():
     cur = con.cursor()
     cur.execute("SELECT Kind,Cost,Amount,Name FROM ShoppingCart")
     return render_template("ShoppingCart.html", rows=cur.fetchall())
-
+    con.close()
 
 @app.route("/Checkout.html")
 def get_checkout():
@@ -92,6 +92,7 @@ def get_checkout():
     total += sub + tax
     totals = (sub, tax, total)
     return render_template("Checkout.html", rows=rows, totals=totals)
+    con.close()
 
 @app.route("/addReview.html")
 def add_review():
@@ -109,6 +110,7 @@ def get_reviews():
     rows = cur.fetchall()
     print(len(rows))
     return render_template("ShowReviews.html",rows=rows)
+    con.close()
 
 app.route("/Receipt.html")
 def get_receipt():
@@ -124,6 +126,7 @@ def get_receipt():
     total += sub + tax
     totals = (sub, tax, total)
     return render_template("Receipt.html", rows=cur.fetchall(), totals=totals)
+    con.close()
 
 @app.route("/addrec", methods=["POST", "GET"])
 def addrec():
@@ -162,7 +165,7 @@ def getrec():
     rows = cur.fetchall()
     print(len(rows))
     return render_template("ShowReviews.html", rows=rows)
-   
+    con.close()
          
 def load_inventory():
     dbInsert("Inventory", "Produce", "Avocados", 1000, 1.00)
@@ -235,7 +238,7 @@ def load_items(dept):
     else:
         print("Could not load_items")
         return None;
-
+    con.close()
 
 @app.route("/addToCart", methods=["POST", "GET"])
 def addToCart():
@@ -255,7 +258,7 @@ def addToCart():
             con.rollback()
         finally:
             return get_shopping_cart()
-
+            con.close()
 
 @app.route("/Checkout.html", methods=["POST", "GET"])
 def checkout():
@@ -285,10 +288,11 @@ def checkout():
                 return render_template("Receipt.html", rows=rows, totals=totals)
             print("Could not checkout")
             return render_template("Checkout.html")
-
+            con.close()
 
 if __name__ == "__main__":
     # If db empty, load_inventory()
     if not sql.connect("groceryData.db").cursor().execute("SELECT * FROM Inventory").fetchall():
         load_inventory()
     app.run(host="0.0.0.0")
+
