@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, url_for
 import sqlite3 as sql
 import datetime
+from random import randint
 
 app = Flask(__name__)
 
@@ -77,6 +78,30 @@ def get_shopping_cart():
 
 @app.route("/Checkout.html")
 def get_checkout():
+    global randnum
+    print(randnum)
+    print("just got randnum")
+    if randnum == 1:
+       day = "Sunday"
+       num = 0.95
+    if randnum == 2:
+       day = "Monday"
+       num = 0.85
+    if randnum == 3:
+       day = "Tuesday"
+       num = 0.90
+    if randnum == 4:
+       day = "Wednesday"
+       num = 0.75
+    if randnum == 5:
+       day = "Thursday"
+       num = 0.80
+    if randnum == 6:
+       day = "Friday"
+       num = 0.90
+    if randnum == 7:
+       day = "Saturday"
+       num = 0.95
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
     cur = con.cursor()
@@ -84,12 +109,12 @@ def get_checkout():
     sub = tax = total = 0
     rows = cur.fetchall()
     for row in rows:
-        sub += row["Cost"] * row["Amount"]
+        sub += row["Cost"] * row["Amount"] * num
         tax += row["Cost"] * row["Amount"] * row["Tax"]
     total += sub + tax
     totals = (sub, tax, total)
     con.close()
-    return render_template("Checkout.html", rows=rows, totals=totals)
+    return render_template("Checkout.html", day=day, num=num,rows=rows, totals=totals)
 
 
 @app.route("/RequestProduct.html")
@@ -265,6 +290,28 @@ def addToCart():
 @app.route("/Checkout.html", methods=["POST", "GET"])
 def checkout():
     if request.method == "POST":
+        global randnum
+        if randnum == 1:
+           day = "Sunday"
+           num = 0.95
+        if randnum == 2:
+           day = "Monday"
+           num = 0.85
+        if randnum == 3:
+           day = "Tuesday"
+           num = 0.90
+        if randnum == 4:
+           day = "Wednesday"
+           num = 0.75
+        if randnum == 5:
+           day = "Thursday"
+           num = 0.80
+        if randnum == 6:
+           day = "Friday"
+           num = 0.90
+        if randnum == 7:
+           day = "Saturday"
+           num = 0.95
         try:
             with sql.connect("groceryData.db") as con:
                 con.row_factory = sql.Row
@@ -284,16 +331,17 @@ def checkout():
             rows = cur.fetchall()
             sub = tax = total = 0
             for row in rows:
-                sub += row["Cost"] * row["Amount"]
+                sub += row["Cost"] * row["Amount"] * num
                 tax += row["Cost"] * row["Amount"] * row["Tax"]
             total += sub + tax
             totals = (sub, tax, total)
-            return render_template("Receipt.html", rows=rows, totals=totals)
+            return render_template("Receipt.html", day=day, num=num, rows=rows, totals=totals)
 
 
 if __name__ == "__main__":
     # If db empty, load_inventory()
     if not sql.connect("groceryData.db").cursor().execute("SELECT * FROM Inventory").fetchall():
         load_inventory()
+    randnum = randint(1,7)
     app.run(host="0.0.0.0")
 
