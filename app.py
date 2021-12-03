@@ -93,8 +93,24 @@ def get_checkout():
     totals = (sub, tax, total)
     return render_template("Checkout.html", rows=rows, totals=totals)
 
+@app.route("/addReview.html")
+def add_review():
+    return render_template("addReview.html")
 
-@app.route("/Receipt.html")
+@app.route("/ShowReviews.html")
+def get_reviews():
+    con = sql.connect("groceryData.db")
+    con.row_factory = sql.Row
+
+    cur = con.cursor()
+    print("established cursor")
+    cur.execute("SELECT * FROM Review")
+    print("executed")
+    rows = cur.fetchall()
+    print(len(rows))
+    return render_template("ShowReviews.html",rows=rows)
+
+app.route("/Receipt.html")
 def get_receipt():
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
@@ -109,7 +125,45 @@ def get_receipt():
     totals = (sub, tax, total)
     return render_template("Receipt.html", rows=cur.fetchall(), totals=totals)
 
+@app.route("/addrec", methods=["POST", "GET"])
+def addrec():
+    if request.method == "POST":
+       try:
+          print("inside try")
+          name = request.form["Name"]
+          print("name is ", name)
+          rating = request.form["Rating"]
+          print("rating is ", rating)
+          review = request.form["Review"]
+          print("review is ", review)
+          with sql.connect("groceryData.db") as con:
+             cur = con.cursor()
+             print("after cursor set")
+             cur.execute("INSERT INTO Review (Name,Rating,Review) VALUES (?,?,?)",(name, rating, review))
+             print("after execute")
+             con.commit()
+             print("after commit")
+       except:
+          print("inside except")
+          con.rollback()
+       finally:
+          return render_template("index.html")
+          con.close()
 
+@app.route("/getrec")
+def getrec():
+    con = sql.connect("groceryData.db")
+    con.row_factory = sql.Row
+
+    cur = con.cursor()
+    print("established cursor")
+    cur.execute("SELECT * FROM Review")
+    print("executed")
+    rows = cur.fetchall()
+    print(len(rows))
+    return render_template("ShowReviews.html", rows=rows)
+   
+         
 def load_inventory():
     dbInsert("Inventory", "Produce", "Avocados", 1000, 1.00)
     dbInsert("Inventory", "Produce", "Bananas", 1000, 0.10)
