@@ -68,6 +68,9 @@ def get_total_inventory():
 def get_changeDept():
     return render_template("changeDept.html")
 
+@app.route("/RequestProduct.html")
+def request_prods():
+    return render_template("RequestProduct.html")
 
 @app.route("/ShoppingCart.html")
 def get_shopping_cart():
@@ -92,6 +95,20 @@ def get_checkout():
     total += sub + tax
     totals = (sub, tax, total)
     return render_template("Checkout.html", rows=rows, totals=totals)
+    con.close()
+
+@app.route("/requests.html")
+def requests():
+    con = sql.connect("groceryData.db")
+    con.row_factory = sql.Row
+
+    cur = con.cursor()
+    print("established cursor")
+    cur.execute("SELECT * FROM Requests")
+    print("executed")
+    rows = cur.fetchall()
+    print(len(rows))
+    return render_template("requests.html",rows=rows)
     con.close()
 
 @app.route("/addReview.html")
@@ -166,6 +183,55 @@ def getrec():
     print(len(rows))
     return render_template("ShowReviews.html", rows=rows)
     con.close()
+
+@app.route("/requestproduct", methods=["POST", "GET"])
+def requestproduct():
+   if request.method == "POST":
+       try:
+          print("inside try")
+          name = request.form["Name"]
+          print("name is ", name)
+          kind = request.form["Kind"]
+          print("kind is ", kind)
+          with sql.connect("groceryData.db") as con:
+             cur = con.cursor()
+             print("after cursor set")
+             cur.execute("INSERT INTO Requests (Name,Kind) VALUES (?,?)",(name, kind))
+             print("after execute")
+             con.commit()
+             print("after commit")
+       except:
+          print("inside except")
+          con.rollback()
+       finally:
+          cur.execute("SELECT * FROM Requests")
+          print("executed")
+          rows = cur.fetchall()
+          print(len(rows))
+          return render_template("requests.html",rows=rows)
+          con.close() 
+    
+@app.route("/filecomplaint", methods=["POST", "GET"])
+def filecomplaint():
+    if request.method == "POST":
+       try:
+          print("inside try")
+          complaint = request.form["Complaint"]
+          print("name is ", name)
+          time = request.form["Time"]
+          with sql.connect("groceryData.db") as con:
+             cur = con.cursor()
+             print("after cursor set")
+             cur.execute("INSERT INTO Complaints (Complaint,Time) VALUES (?,?)",(complaint, time))
+             print("after execute")
+             con.commit()
+             print("after commit")
+       except:
+          print("inside except")
+          con.rollback()
+       finally:
+          return render_template("requests.html")
+          con.close()
          
 def load_inventory():
     dbInsert("Inventory", "Produce", "Avocados", 1000, 1.00)
