@@ -1,5 +1,17 @@
 # Python-Project
 
+## Names
+Aishwareeya Rath
+Bailey Carr
+Tony Drouillard
+
+## GitHub link
+https://github.com/aishrath/Python-Project
+
+It's a private GitHub, so I'm not sure if this is accessible to anyone not approved, which should be all the graders and Dr. Kuhnle.
+
+## Video Link
+
 ## Problem we were trying to solve
 This group attempted to model a grocery store. This meant that we were in charge of upkeeping inventory, maintaining a shopping cart, maintaining a checkout line, and maintaining a receipt window. We attempted to follow CRUD protocol for this database.
 
