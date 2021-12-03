@@ -1,0 +1,21 @@
+<html>
+<body>
+<table border = 1>
+  <thead>
+    <td>User</td>
+    <td>Review</td>
+    <td>Rating</td>
+  </thead>
+
+  {% for row in rows %}
+    <tr>
+       <td>{{row["Name"]}}</td>
+       <td>{{row["Rating"]}}</td>
+       <td>{{row["Review"]}}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+<a href="/">back to home</a>
+</body>
+</html>
