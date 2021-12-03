@@ -8,12 +8,15 @@ app = Flask(__name__)
 
 def dbInsert(table, kind, name, amount, cost, tax=-1):
     con = sql.connect("groceryData.db")
-    con.row_factory = sql.Row
     cur = con.cursor()
-    if(tax == -1):
-        cur.execute("INSERT INTO %s (Kind,Name,Amount,Cost) VALUES (?,?,?,?)" % table, (kind, name, amount, cost))
+    alreadyExists = cur.execute("SELECT Amount FROM %s WHERE Name=?" % table, (name,)).fetchone()
+    if(alreadyExists):
+        cur.execute("UPDATE {0} SET Amount={1} WHERE Name='{2}'".format(table, int(alreadyExists[0])+int(amount), name))
     else:
-        cur.execute("INSERT INTO %s (Kind,Name,Amount,Cost,Tax) VALUES (?,?,?,?,?)" % table, (kind, name, amount, cost, tax))
+        if(tax == -1):
+            cur.execute("INSERT INTO %s (Kind,Name,Amount,Cost) VALUES (?,?,?,?)" % table, (kind, name, amount, cost))
+        else:
+            cur.execute("INSERT INTO %s (Kind,Name,Amount,Cost,Tax) VALUES (?,?,?,?,?)" % table, (kind, name, amount, cost, tax))
     con.commit()
     con.close()
 
@@ -83,25 +86,28 @@ def get_checkout():
     print("just got randnum")
     if randnum == 1:
        day = "Sunday"
-       num = 0.95
-    if randnum == 2:
+       sale = 0.95
+    elif randnum == 2:
        day = "Monday"
-       num = 0.85
-    if randnum == 3:
+       sale = 0.85
+    elif randnum == 3:
        day = "Tuesday"
-       num = 0.90
-    if randnum == 4:
+       sale = 0.90
+    elif randnum == 4:
        day = "Wednesday"
-       num = 0.75
-    if randnum == 5:
+       sale = 0.75
+    elif randnum == 5:
        day = "Thursday"
-       num = 0.80
-    if randnum == 6:
+       sale = 0.80
+    elif randnum == 6:
        day = "Friday"
-       num = 0.90
-    if randnum == 7:
+       sale = 0.90
+    elif randnum == 7:
        day = "Saturday"
-       num = 0.95
+       sale = 0.95
+    else:
+        day = "A Normal Day"
+        sale = 1
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
     cur = con.cursor()
@@ -109,12 +115,12 @@ def get_checkout():
     sub = tax = total = 0
     rows = cur.fetchall()
     for row in rows:
-        sub += row["Cost"] * row["Amount"] * num
+        sub += row["Cost"] * row["Amount"] * sale
         tax += row["Cost"] * row["Amount"] * row["Tax"]
     total += sub + tax
     totals = (sub, tax, total)
     con.close()
-    return render_template("Checkout.html", day=day, num=num,rows=rows, totals=totals)
+    return render_template("Checkout.html", day=day, sale=sale*100,rows=rows, totals=totals)
 
 
 @app.route("/RequestProduct.html")
@@ -155,26 +161,21 @@ def get_receipt():
     print(randnum)
     print("just got randnum")
     if randnum == 1:
-       day = "Sunday"
-       num = 0.95
-    if randnum == 2:
-       day = "Monday"
-       num = 0.85
-    if randnum == 3:
-       day = "Tuesday"
-       num = 0.90
-    if randnum == 4:
-       day = "Wednesday"
-       num = 0.75
-    if randnum == 5:
-       day = "Thursday"
-       num = 0.80
-    if randnum == 6:
-       day = "Friday"
-       num = 0.90
-    if randnum == 7:
-       day = "Saturday"
-       num = 0.95
+        sale = 0.95
+    elif randnum == 2:
+        sale = 0.85
+    elif randnum == 3:
+        sale = 0.90
+    elif randnum == 4:
+        sale = 0.75
+    elif randnum == 5:
+        sale = 0.80
+    elif randnum == 6:
+        sale = 0.90
+    elif randnum == 7:
+        sale = 0.95
+    else:
+        sale = 1
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
     cur = con.cursor()
@@ -182,7 +183,7 @@ def get_receipt():
     rows = cur.fetchall()
     sub = tax = total = 0
     for row in rows:
-        sub += row["Cost"] * row["Amount"] * num
+        sub += row["Cost"] * row["Amount"] * sale
         tax += row["Cost"] * row["Amount"] * row["Tax"]
     total += sub + tax
     totals = (sub, tax, total)
@@ -205,7 +206,7 @@ def addReview():
             con.rollback()
             con.close()
             return render_template("index.html")
-        finally:
+        else:
             con.close()
             return show_reviews()
 
@@ -224,7 +225,7 @@ def requestProduct():
             con.rollback()
             con.close()
             return render_template("index.html")
-        finally:
+        else:
             con.close()
             return show_requests()
 
@@ -249,7 +250,7 @@ def file_complaint():
 def load_inventory():
     dbInsert("Inventory", "Produce", "Avocados", 1000, 1.00)
     dbInsert("Inventory", "Produce", "Bananas", 1000, 0.10)
-    dbInsert("Inventory", "Produce","Broccoli", 1000, 1.50)
+    dbInsert("Inventory", "Produce", "Broccoli", 1000, 1.50)
     dbInsert("Inventory", "Produce", "Mangoes", 1000, 0.70)
     dbInsert("Inventory", "Produce", "Mushrooms", 1000, 0.05)
     dbInsert("Inventory", "Produce", "Bok Choy", 1000, 3.00)
@@ -263,7 +264,7 @@ def load_inventory():
     dbInsert("Inventory", "Electronics", "Printer", 100, 50.00)
     dbInsert("Inventory", "Electronics", "Charger Cables", 100, 9.99)
     dbInsert("Inventory", "Electronics", "Lightning Ports", 100, 19.99)
-    dbInsert("Inventory", "Electronics","Mouse Pads", 100, 9.99)
+    dbInsert("Inventory", "Electronics", "Mouse Pads", 100, 9.99)
     dbInsert("Inventory", "Electronics", "Keyboard", 100, 69.99)
     dbInsert("Inventory", "Electronics", "Game System", 100, 359.99)
     dbInsert("Inventory", "Electronics", "Electronic Cleaner", 100, 29.99)
@@ -300,8 +301,12 @@ def addToCart():
                 for row in rows:
                     if(request.form[row["Name"]] == "0"):
                         continue
+                    # Add to Cart
                     dbInsert("ShoppingCart", row["Kind"], row["Name"], request.form[row["Name"]],
                              row["Cost"], 0.075 if (dept != "Produce" and dept != "Seafood") else 0)
+                    # Update Inventory
+                    dbInsert("Inventory", row["Kind"], row["Name"], -int(request.form[row["Name"]]), row["Cost"],
+                             0.075 if (dept != "Produce" and dept != "Seafood") else 0)
                 print("addedToCart")
         except:
             print("Could not addToCart")
@@ -316,26 +321,21 @@ def checkout():
     if request.method == "POST":
         global randnum
         if randnum == 1:
-           day = "Sunday"
-           num = 0.95
-        if randnum == 2:
-           day = "Monday"
-           num = 0.85
-        if randnum == 3:
-           day = "Tuesday"
-           num = 0.90
-        if randnum == 4:
-           day = "Wednesday"
-           num = 0.75
-        if randnum == 5:
-           day = "Thursday"
-           num = 0.80
-        if randnum == 6:
-           day = "Friday"
-           num = 0.90
-        if randnum == 7:
-           day = "Saturday"
-           num = 0.95
+            sale = 0.95
+        elif randnum == 2:
+            sale = 0.85
+        elif randnum == 3:
+            sale = 0.90
+        elif randnum == 4:
+            sale = 0.75
+        elif randnum == 5:
+            sale = 0.80
+        elif randnum == 6:
+            sale = 0.90
+        elif randnum == 7:
+            sale = 0.95
+        else:
+            sale = 1
         try:
             with sql.connect("groceryData.db") as con:
                 con.row_factory = sql.Row
@@ -350,22 +350,23 @@ def checkout():
             con.rollback()
             con.close()
             return render_template("index.html")
-        finally:
-            cur.execute("SELECT Kind,Name,Amount,Cost,Tax FROM Receipt")
+        else:
+            cur.execute("SELECT * FROM Receipt")
             rows = cur.fetchall()
             sub = tax = total = 0
             for row in rows:
-                sub += row["Cost"] * row["Amount"] * num
+                # Calculate Receipt values
+                sub += row["Cost"] * row["Amount"] * sale
                 tax += row["Cost"] * row["Amount"] * row["Tax"]
             total += sub + tax
             totals = (sub, tax, total)
-            return render_template("Receipt.html", day=day, num=num, rows=rows, totals=totals)
+            return render_template("Receipt.html", rows=rows, totals=totals)
 
 
 if __name__ == "__main__":
     # If db empty, load_inventory()
-    if not sql.connect("groceryData.db").cursor().execute("SELECT * FROM Inventory").fetchall():
+    if not sql.connect("groceryData.db").cursor().execute("SELECT * FROM Inventory").fetchone():
         load_inventory()
-    randnum = randint(1,7)
+    randnum = randint(1, 7)
     app.run(host="0.0.0.0")
 
