@@ -1,3 +1,10 @@
+# Names: Bailey Carr, Tony Drouillard, Aishwareeya Rath
+# FSUID: bfc19, tld19b, ar19c
+# Due Date: December 3, 2021
+# This project was completed on the group efforts of Bailey Carr, Tony Drouillar, and Aishwareeya Rath
+
+#this entire program is purely meant for creation of tables and the database
+
 import sqlite3
 
 conn = sqlite3.connect('groceryData.db')

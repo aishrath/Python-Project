@@ -1,3 +1,13 @@
+# Names: Bailey Carr, Tony Drouillard, Aishwareeya Rath
+# FSUID: bfc19, tld19b, ar19c
+# Due Date: December 3, 2021
+# This project was completed on the group efforts of Bailey Carr, Tony Drouillar, and Aishwareeya Rath
+
+# These are various libraries we needed for the project
+# flask gives us ability to interact with the user through HTML
+# sqlite3 gives us interaction with the database
+# datetime allows us to get the current date and time
+# randint allows us to get the number of the day of the week
 from flask import Flask, render_template, request, url_for
 import sqlite3 as sql
 import datetime
@@ -5,7 +15,7 @@ from random import randint
 
 app = Flask(__name__)
 
-
+# a function we wrote to streamline inserts into the database
 def dbInsert(table, kind, name, amount, cost, tax=-1):
     con = sql.connect("groceryData.db")
     cur = con.cursor()
@@ -20,7 +30,8 @@ def dbInsert(table, kind, name, amount, cost, tax=-1):
     con.commit()
     con.close()
 
-
+# a function written to assist with grabbing things from the inventory we have, if it is not the total inventory
+# if it is the total inventory, we just grab the whole entire inventory
 def get_X_inventory(kind):
     con = sql.connect("groceryData.db")
     con.row_factory = sql.Row
@@ -32,42 +43,44 @@ def get_X_inventory(kind):
     con.close()
     return rows
 
-
+# renders the homepage
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
+# renders the main inventory page, from here the user can go to different inventories based off of what kind of
+# product they would like to buy. They can also view all products in one list through a link on this page
 @app.route("/Inventory.html")
 def get_inventory():
     return render_template("Inventory.html")
 
-
+# renders the produce inventory
 @app.route("/Produce.html")
 def get_produce_inventory():
     return render_template("Produce.html", rows=get_X_inventory("Produce"))
 
-
+# renders the household inventory
 @app.route("/Household.html")
 def get_household_inventory():
     return render_template("Household.html", rows=get_X_inventory("Household"))
 
-
+# renders the electronics inventory
 @app.route("/Electronics.html")
 def get_electronics_inventory():
     return render_template("Electronics.html", rows=get_X_inventory("Electronics"))
 
-
+# renders the seafood inventory
 @app.route("/Seafood.html")
 def get_seafood_inventory():
     return render_template("Seafood.html", rows=get_X_inventory("Seafood"))
 
-
+# renders all products in the inventory
 @app.route("/TotalInventory.html")
 def get_total_inventory():
     return render_template("TotalInventory.html", rows=get_X_inventory("TotalInventory"))
 
-
+# this grabs all the products the user currently has sitting inside of their shopping cart and displays it
+# to them on the shopping cart page
 @app.route("/ShoppingCart.html")
 def get_shopping_cart():
     con = sql.connect("groceryData.db")
@@ -78,12 +91,16 @@ def get_shopping_cart():
     con.close()
     return render_template("ShoppingCart.html", rows=rows)
 
-
+# This page displays the checkout totals of everything the user has in their cart
+# we have also added "sales" for each day of the week. This day of the week is generated
+# by a random number generator from 1 to 7. The corresponding day and sale amount is shown
 @app.route("/Checkout.html")
 def get_checkout():
+# we have to make randnum from the randnum est in main, so it is the global randnum
     global randnum
     print(randnum)
     print("just got randnum")
+# decides the sale and the day of the week
     if randnum == 1:
        day = "Sunday"
        sale = 0.95
@@ -108,6 +125,7 @@ def get_checkout():
     else:
         day = "A Normal Day"
         sale = 1
+# grabs the sale amount as a percent
     discount = 1 - sale
     discount = round(discount, 2)
     con = sql.connect("groceryData.db")
@@ -116,6 +134,7 @@ def get_checkout():
     cur.execute("SELECT Kind,Name,Amount,Cost,Tax FROM ShoppingCart")
     sub = tax = total = 0
     rows = cur.fetchall()
+# calculates the cost with the sale factored in
     for row in rows:
         sub += row["Cost"] * row["Amount"] * sale
         tax += row["Cost"] * row["Amount"] * row["Tax"]
@@ -124,12 +143,12 @@ def get_checkout():
     con.close()
     return render_template("Checkout.html", day=day, sale=discount*100,rows=rows, totals=totals)
 
-
+# users can request products through this page
 @app.route("/RequestProduct.html")
 def add_request():
     return render_template("RequestProduct.html")
 
-
+# users can see other users' requests through this page
 @app.route("/ShowRequests.html")
 def show_requests():
     con = sql.connect("groceryData.db")
@@ -140,12 +159,12 @@ def show_requests():
     con.close()
     return render_template("ShowRequests.html", rows=rows)
 
-
+# if a user wants to add their review, this page will show
 @app.route("/AddReview.html")
 def add_review():
     return render_template("AddReview.html")
 
-
+# users can see everyone's review from this page
 @app.route("/ShowReviews.html")
 def show_reviews():
     con = sql.connect("groceryData.db")
@@ -156,7 +175,8 @@ def show_reviews():
     con.close()
     return render_template("ShowReviews.html", rows=rows)
 
-
+# this page generates the receipt for the products that the user has purchased
+# once again the random number is chose through that global randnum
 @app.route("/Receipt.html")
 def get_receipt():
     global randnum
@@ -192,7 +212,8 @@ def get_receipt():
     con.close()
     return render_template("Receipt.html", rows=rows, totals=totals)
 
-
+# this grabs the data the user submitted from the add review page and just adds it
+# to the appropirate table in the database
 @app.route("/addReview", methods=["POST", "GET"])
 def addReview():
     if request.method == "POST":
@@ -212,7 +233,7 @@ def addReview():
             con.close()
             return show_reviews()
 
-
+# same as above, grabs the users wishes and adds it to the right tabel
 @app.route("/requestProduct", methods=["POST", "GET"])
 def requestProduct():
     if request.method == "POST":
@@ -231,6 +252,7 @@ def requestProduct():
             con.close()
             return show_requests()
 
+# if a user has complaints :( they can add their complaints and the approrpiate page is rendered
 @app.route("/Complaints.html")
 def get_complaint_form():
     con = sql.connect("groceryData.db")
@@ -239,7 +261,7 @@ def get_complaint_form():
     rows = cur.fetchall()
     return render_template("Complaints.html",rows=rows)
 
-
+# grabs data from the complaints page and add it to the table
 @app.route("/file_complaint", methods=["POST", "GET"])
 def file_complaint():
     if request.method == "POST":
@@ -260,7 +282,7 @@ def file_complaint():
         finally:
             return render_template("index.html")
 
-
+# we have hard coded 40 products, 10 per kind
 def load_inventory():
     dbInsert("Inventory", "Produce", "Avocados", 1000, 1.00)
     dbInsert("Inventory", "Produce", "Bananas", 1000, 0.10)
@@ -271,7 +293,7 @@ def load_inventory():
     dbInsert("Inventory", "Produce", "Plantains", 1000, 1.75)
     dbInsert("Inventory", "Produce", "Oranges", 1000, 0.20)
     dbInsert("Inventory", "Produce", "Strawberries", 1000, 0.50)
-    dbInsert("Inventory", "Produce", "Mangoes", 1000, 2.00)
+    dbInsert("Inventory", "Produce", "Beans", 1000, 2.00)
     dbInsert("Inventory", "Electronics", "Laptop", 100, 599.99)
     dbInsert("Inventory", "Electronics", "Television", 100, 299.99)
     dbInsert("Inventory", "Electronics", "Smartphone", 100, 799.99)
@@ -304,7 +326,10 @@ def load_inventory():
     dbInsert("Inventory", "Seafood", "Eel", 20, 47.00)
     print("load_inventory committed")
 
-
+# this is how the products actually get added into the table
+# we have drop downs next to each thing inside of the table they can see when trying to purchase something
+# they can go to the appropriate button, add however much they want, and then it'll be added to
+# their shopping cart and that much is removed from the inventory
 @app.route("/addToCart", methods=["POST", "GET"])
 def addToCart():
     if request.method == "POST":
@@ -329,7 +354,8 @@ def addToCart():
             con.close()
             return get_shopping_cart()
 
-
+# when the user wants to checkout, this page will get them their sale amount and 
+# render the appropriate page after performing the calculations necessary
 @app.route("/Checkout.html", methods=["POST", "GET"])
 def checkout():
     if request.method == "POST":
@@ -376,7 +402,7 @@ def checkout():
             totals = (sub, tax, total)
             return render_template("Receipt.html", rows=rows, totals=totals)
 
-
+# just a main to actually get the program running
 if __name__ == "__main__":
     # If db empty, load_inventory()
     if not sql.connect("groceryData.db").cursor().execute("SELECT * FROM Inventory").fetchone():
