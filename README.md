@@ -47,4 +47,4 @@ Bailey - Shopping Cart
 
 Tony - Checkout
 
-The group later all helped each other with adding new features or making the experience more user friendly. This was after we got the basic shell of the program and the grocery store complete. We all helped each other with each of the parts, so in the end, all three of us ended up working on the entire project together.
+The group all helped each other with not only the parts we divided it into, but also with adding new features or making the experience more user friendly. This was after we got the basic shell of the program and the grocery store complete. We all helped each other with each of the parts, so in the end, all three of us ended up working on the entire project together.
